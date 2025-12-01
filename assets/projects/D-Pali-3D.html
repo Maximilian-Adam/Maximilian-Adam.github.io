@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>D-PALI 3D</title>
+  <meta content="D-PALI 3D dexterous gripper with RL control built at Imperial College London." name="description">
+  <meta content="D-PALI, robotics, reinforcement learning, MuJoCo, TD3" name="keywords">
+
+  <!-- Favicons -->
+  <link href="../../assets/img/profileIcon.png" rel="icon">
+  <link href="../../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="../../assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="../../assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../../assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="../../assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="../../assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="../../assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="../../assets/css/style.css" rel="stylesheet">  
+
+</head>
+
+<body style="background:var(--port)">
+
+  <main id="main">
+
+     <!-- ======= Portfolio Details ======= -->
+     <div id="portfolio-details" class="portfolio-details">
+      <div class="container">
+
+        <div class="row">
+
+          <div class="col-lg-6">
+            <h2 class="portfolio-title">D-PALI 3D &mdash; dexterous gripper with RL control</h2>
+
+            <div class="portfolio-details-slider swiper">
+              <div class="swiper-wrapper align-items-center">
+
+                <div class="swiper-slide">
+                  <img src="../img/portfolio/D-Pali-3D/D-Pali_Gripper.png" alt="D-PALI 3D gripper CAD">
+                </div>
+
+                <div class="swiper-slide">
+                  <img src="../img/portfolio/D-Pali-3D/GripperInAction.png" alt="D-PALI 3D gripper in action">
+                </div>
+
+              </div>
+              <div class="swiper-pagination"></div>
+            </div>
+          </div>
+
+          <div class="col-lg-6 portfolio-info">
+            <h3>Project information</h3>
+            <p>
+              10-week Imperial College project extending the Manipulation and Touch Lab's D-PALI gripper into full 3D manipulation. We redesigned the linkage and rotating finger bases to widen the workspace while keeping the low-actuator philosophy, then built MuJoCo simulations to validate kinematics before physical tests.
+            </p>
+            <p>
+              Trained TD3 policies (Gymnasium + Stable Baselines3) to move and orient a cube, using reward shaping (approach, manipulation, orientation, contact) and OU noise. Hyperparameter sweeps covered LR decay, batch size, gamma, and network width. Results show stable planar orientation/positioning with clear future work on vectorised environments and imitation learning.
+            </p>
+            
+            <div class="social-links">
+              <a href="https://github.com/Maximilian-Adam/D-PALI/tree/main" class="github" target="_blank"><i class="bx bxl-github "></i></a>
+              <a href="https://www.youtube.com/watch?v=75graQ1XKI4" class="link-external" target="_blank"><i class="bx bx-link-external"></i></a>
+              <a href="../pdfs/D_Pali_Report.pdf" class="pdf" target="_blank"><i class="bx bxs-file-pdf" ></i></a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div><!-- End Portfolio Details -->
+
+  </main><!-- End #main -->
+
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="../../assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="../../assets/vendor/aos/aos.js"></script>
+  <script src="../../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="../../assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="../../assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="../../assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="../../assets/vendor/typed.js/typed.umd.js"></script>
+  <script src="../../assets/vendor/waypoints/noframework.waypoints.js"></script>
+  <script src="../../assets/vendor/php-email-form/validate.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="../../assets/js/main.js"></script>
+
+</body>
+
+</html>
