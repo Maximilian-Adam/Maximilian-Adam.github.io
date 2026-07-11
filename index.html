@@ -1,699 +1,1747 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Maximilian Adam</title>
-  <meta content="Imperial College London computer engineering student specialising in ML, cryptography, and simulation." name="description">
-  <meta content="Maximilian Adam, computer engineering, machine learning, cryptography, Imperial College London" name="keywords">
+  <title>Maximilian Adam — Cryptography · Imperial College London</title>
+  <meta name="description" content="Maximilian Adam — MEng Electronic &amp; Information Engineering at Imperial College London. Cryptography research: verifiable computation and post-quantum signatures (HAWK · E8 lattice).">
+  <meta name="author" content="Maximilian Adam">
+  <meta name="theme-color" content="#0a0f26">
+  <link rel="canonical" href="https://maximilian-adam.github.io/">
 
-  <!-- Favicons -->
-  <link href="assets/img/profileIcon.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Maximilian Adam — Cryptography">
+  <meta property="og:description" content="Building verifiable, post-quantum systems. MEng thesis: instantiating HAWK with the E8 lattice.">
+  <meta property="og:url" content="https://maximilian-adam.github.io/">
+  <meta property="og:image" content="https://maximilian-adam.github.io/assets/img/profileIcon.png">
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <!-- Favicon: inline SVG, mint dot-ring on deep indigo -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0f26'/%3E%3Ccircle cx='32' cy='32' r='21' fill='none' stroke='%236ee7c7' stroke-width='2.5' stroke-dasharray='1.5 6.4'/%3E%3Ccircle cx='32' cy='32' r='10' fill='none' stroke='%2358c7f3' stroke-width='1.5' stroke-dasharray='1.5 4'/%3E%3Ccircle cx='32' cy='32' r='3.2' fill='%236ee7c7'/%3E%3C/svg%3E">
 
-  <!-- Vendor CSS Files -->
-  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <!-- Fonts: the only external resource -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
 
-  <!-- Template Main CSS File -->
-  <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    /* ============================================================
+       E8 OBSERVATORY — design tokens
+       ============================================================ */
+    :root {
+      --bg-hi:   #10193b;
+      --bg-mid:  #0a0f26;
+      --bg-lo:   #060912;
+      --ink:     #e7ecfb;
+      --ink-2:   #b9c4e6;
+      --ink-3:   #9fb0dd;
+      --muted:   #6a78a6;
+      --mint:    #6ee7c7;
+      --cyan:    #58c7f3;
+      --amber:   #e8a46b;
+      --line:    #141a30;
+      --line-mint: rgba(110, 231, 199, 0.14);
+      --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+      --disp: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+      --body: 'Inter', system-ui, -apple-system, sans-serif;
+      --nav-h: 4.25rem;
+    }
 
-  <!-- =======================================================
-  * Template Name: iPortfolio
-  * Template URL: https://bootstrapmade.com/iportfolio-bootstrap-portfolio-websites-template/
-  * Updated: Mar 17 2024 with Bootstrap v5.3.3
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
+    /* ============================================================
+       Base
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      scroll-padding-top: calc(var(--nav-h) + 1rem);
+      background: var(--bg-lo);
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      html { scroll-behavior: smooth; }
+    }
+
+    body {
+      margin: 0;
+      font: 400 1rem/1.7 var(--body);
+      color: var(--ink-2);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Fixed gradient field: lightest toward the hero focal point,
+       darkening to the edges. Lives on a fixed layer so mobile
+       scrolling stays smooth. */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(120vmax 80vmax at 70% 8%, var(--bg-hi), transparent 55%),
+        radial-gradient(90vmax 70vmax at 15% 70%, #0c1330, transparent 60%),
+        linear-gradient(180deg, var(--bg-mid), var(--bg-lo));
+    }
+
+    h1, h2, h3 {
+      font-family: var(--disp);
+      font-weight: 300;
+      color: var(--ink);
+      letter-spacing: -0.015em;
+      line-height: 1.15;
+      margin: 0;
+    }
+
+    p { margin: 0 0 1.1rem; }
+    p:last-child { margin-bottom: 0; }
+
+    a { color: var(--mint); text-decoration: none; }
+    a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    strong { color: var(--ink); font-weight: 500; }
+
+    ::selection { background: rgba(110, 231, 199, 0.25); color: var(--ink); }
+
+    :focus-visible {
+      outline: 2px solid var(--mint);
+      outline-offset: 3px;
+      border-radius: 2px;
+    }
+
+    .wrap { width: min(1120px, 92vw); margin-inline: auto; }
+
+    /* Skip link — first tab stop */
+    .skip {
+      position: fixed;
+      top: 0.6rem; left: 0.6rem;
+      z-index: 100;
+      transform: translateY(-300%);
+      background: var(--bg-lo);
+      border: 1px solid var(--mint);
+      color: var(--mint);
+      font: 500 0.72rem var(--mono);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.7rem 1rem;
+      border-radius: 4px;
+      transition: transform 0.2s ease;
+    }
+    .skip:focus { transform: none; text-decoration: none; }
+
+    /* Monospace micro-label used across the site */
+    .micro {
+      font: 500 0.66rem/1.5 var(--mono);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ============================================================
+       Top navigation — mono type, condenses on scroll
+       ============================================================ */
+    .site-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      transition: background 0.35s ease, border-color 0.35s ease;
+      border-bottom: 1px solid transparent;
+    }
+    .site-nav.scrolled {
+      background: rgba(7, 11, 26, 0.82);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      border-bottom-color: var(--line);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      height: var(--nav-h);
+      transition: height 0.35s ease;
+    }
+    .site-nav.scrolled .nav-inner { height: 3.4rem; }
+
+    .brand {
+      font: 500 0.78rem var(--mono);
+      letter-spacing: 0.22em;
+      color: var(--ink);
+      z-index: 70;
+    }
+    .brand:hover { text-decoration: none; color: var(--mint); }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      margin: 0; padding: 0;
+      gap: 1.7rem;
+    }
+    .nav-links a {
+      font: 400 0.68rem var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      padding: 0.4rem 0;
+    }
+    .nav-links a:hover { color: var(--mint); text-decoration: none; }
+    .nav-links a[aria-current="true"] {
+      color: var(--mint);
+      border-bottom: 1px solid var(--mint);
+    }
+
+    .menu-btn {
+      display: none;
+      font: 500 0.68rem var(--mono);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mint);
+      background: none;
+      border: 1px solid var(--line-mint);
+      border-radius: 4px;
+      padding: 0.55rem 0.9rem;
+      cursor: pointer;
+      z-index: 70;
+    }
+
+    @media (max-width: 840px) {
+      .menu-btn { display: inline-flex; }
+      .nav-links {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1.6rem;
+        background: rgba(6, 9, 18, 0.96);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+      .nav-links a { font-size: 0.95rem; }
+      body.menu-open .nav-links { opacity: 1; visibility: visible; }
+      body.menu-open { overflow: hidden; }
+    }
+
+    /* ============================================================
+       Observatory rail (the one aesthetic risk):
+       a fixed instrument strip on the left edge that reports the
+       section currently in view and overall scroll progress.
+       Desktop only; purely a duplicate of visible info (aria-hidden).
+       ============================================================ */
+    .rail {
+      position: fixed;
+      left: 1.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.9rem;
+      height: 56vh;
+    }
+    .rail-track {
+      flex: 1;
+      width: 1px;
+      background: var(--line);
+      position: relative;
+      overflow: hidden;
+    }
+    .rail-fill {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 0%;
+      background: linear-gradient(180deg, rgba(110,231,199,0.2), var(--mint));
+      box-shadow: 0 0 8px rgba(110, 231, 199, 0.5);
+    }
+    .rail-label {
+      font: 500 0.6rem var(--mono);
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--muted);
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      white-space: nowrap;
+      transition: color 0.4s ease;
+    }
+    @media (max-width: 1180px) { .rail { display: none; } }
+
+    /* ============================================================
+       Hero — E8 root system over a starfield
+       ============================================================ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    #e8-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .hero .wrap { position: relative; z-index: 1; }
+    .hero-copy { max-width: 35rem; }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.6rem;
+    }
+    .hero-eyebrow::after {
+      content: '';
+      width: 4.5rem;
+      height: 1px;
+      background: var(--line-mint);
+    }
+
+    .hero h1 {
+      font-size: clamp(2.7rem, 7.5vw, 4.8rem);
+      letter-spacing: -0.025em;
+    }
+    .hero-line {
+      margin-top: 1.3rem;
+      font-size: clamp(1rem, 2.1vw, 1.18rem);
+      font-weight: 300;
+      color: var(--ink-3);
+      max-width: 30rem;
+    }
+
+    /* Telemetry metadata block */
+    .telemetry {
+      margin: 2.2rem 0 0;
+      padding-left: 1.2rem;
+      border-left: 1px solid var(--line-mint);
+      display: grid;
+      gap: 0.55rem;
+    }
+    .tele-row {
+      display: grid;
+      grid-template-columns: 6.5rem 1fr;
+      align-items: baseline;
+      margin: 0;
+    }
+    .tele-row dt {
+      font: 500 0.64rem var(--mono);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .tele-row dd {
+      margin: 0;
+      font: 400 0.78rem var(--mono);
+      letter-spacing: 0.04em;
+      color: var(--ink-2);
+    }
+
+    /* The one pulsing status dot on the site */
+    .pulse-dot {
+      position: relative;
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--mint);
+      margin-right: 0.6rem;
+      box-shadow: 0 0 8px rgba(110, 231, 199, 0.8);
+      vertical-align: 1px;
+    }
+    .pulse-dot::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 1px solid rgba(110, 231, 199, 0.55);
+      animation: ping 2.6s ease-out infinite;
+    }
+    @keyframes ping {
+      0%        { transform: scale(0.4); opacity: 1; }
+      70%, 100% { transform: scale(1.7); opacity: 0; }
+    }
+
+    .hero-ctas { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 2.4rem; }
+
+    /* Caption for the generative render */
+    .canvas-caption {
+      position: absolute;
+      right: 1.4rem;
+      bottom: 1.3rem;
+      z-index: 1;
+      margin: 0;
+      font: 400 0.6rem var(--mono);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Scroll hint */
+    .scroll-hint {
+      position: absolute;
+      left: 50%;
+      bottom: 1.3rem;
+      transform: translateX(-50%);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      font: 500 0.58rem var(--mono);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+    .scroll-hint::before {
+      content: '';
+      width: 1px;
+      height: 2.4rem;
+      background: linear-gradient(180deg, transparent, var(--mint));
+      animation: drop 2.6s ease-in-out infinite;
+    }
+    @keyframes drop {
+      0%   { transform: scaleY(0); transform-origin: top; opacity: 0; }
+      45%  { transform: scaleY(1); transform-origin: top; opacity: 0.9; }
+      100% { transform: scaleY(1); transform-origin: top; opacity: 0; }
+    }
+
+    @media (max-width: 899px) {
+      /* On small screens the mandala sits in the upper third;
+         the copy settles below it. */
+      .hero { align-items: flex-end; padding-bottom: 6rem; }
+      .hero-copy { padding-top: 46vh; padding-top: 46svh; max-width: 100%; }
+      .scroll-hint { display: none; }
+    }
+
+    /* ============================================================
+       Buttons & chips
+       ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font: 500 0.7rem var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mint);
+      border: 1px solid rgba(110, 231, 199, 0.35);
+      border-radius: 4px;
+      padding: 0.85rem 1.25rem;
+      background: none;
+      cursor: pointer;
+      transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .btn:hover {
+      text-decoration: none;
+      background: rgba(110, 231, 199, 0.08);
+      border-color: rgba(110, 231, 199, 0.7);
+      box-shadow: 0 0 26px rgba(110, 231, 199, 0.12);
+    }
+    .btn-solid { background: rgba(110, 231, 199, 0.12); }
+    .btn-solid:hover { background: rgba(110, 231, 199, 0.2); }
+    .btn svg { width: 14px; height: 14px; flex: none; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; padding: 0; margin: 0; list-style: none; }
+    .chip {
+      font: 400 0.63rem var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      border: 1px solid rgba(110, 231, 199, 0.18);
+      border-radius: 999px;
+      padding: 0.28rem 0.7rem;
+      white-space: nowrap;
+    }
+
+    /* ============================================================
+       Section scaffolding
+       ============================================================ */
+    section { padding-block: clamp(4.5rem, 11vh, 8.5rem); }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .eyebrow-id {
+      font: 500 0.68rem var(--mono);
+      letter-spacing: 0.2em;
+      color: var(--mint);
+    }
+    .eyebrow-id.amber { color: var(--amber); }
+    .eyebrow-name {
+      font: 500 0.68rem var(--mono);
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .eyebrow-rule { flex: 1; height: 1px; background: var(--line); }
+
+    section h2 { font-size: clamp(1.8rem, 3.6vw, 2.55rem); margin-bottom: 1.6rem; }
+
+    /* Scroll-reveal — hidden only when JS is running */
+    .js .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+      transition-delay: var(--d, 0s);
+    }
+    .js .reveal.in { opacity: 1; transform: none; }
+
+    /* ============================================================
+       §01 About
+       ============================================================ */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 0.85fr;
+      gap: 3.5rem;
+      align-items: start;
+    }
+    @media (max-width: 899px) { .about-grid { grid-template-columns: 1fr; gap: 2.5rem; } }
+
+    .about-copy p { font-weight: 300; color: var(--ink-2); }
+
+    /* Quick-facts spec readout with HUD corner brackets */
+    .facts-panel {
+      position: relative;
+      background: rgba(16, 22, 44, 0.55);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.5rem 1.6rem 1.7rem;
+    }
+    .facts-panel::before,
+    .facts-panel::after {
+      content: '';
+      position: absolute;
+      width: 15px; height: 15px;
+      border: 1px solid rgba(110, 231, 199, 0.55);
+    }
+    .facts-panel::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+    .facts-panel::after  { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-bottom: 1rem;
+      margin-bottom: 1.1rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .facts { margin: 0; display: grid; gap: 1rem; }
+    .facts > div { display: grid; gap: 0.15rem; }
+    .facts dt {
+      font: 500 0.62rem var(--mono);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .facts dd {
+      margin: 0;
+      font: 400 0.82rem var(--mono);
+      color: var(--ink-2);
+      line-height: 1.55;
+    }
+
+    /* ============================================================
+       §02 Research (featured)
+       ============================================================ */
+    .thesis-meta {
+      font: 400 0.68rem var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: -0.5rem 0 2rem;
+    }
+    .thesis-meta:last-child {
+      margin-bottom: 3rem;
+    }
+    .thesis-meta .sep { color: var(--line-mint); padding: 0 0.5rem; }
+
+    .thesis-panel {
+      position: relative;
+      background: linear-gradient(180deg, rgba(232, 164, 107, 0.045), rgba(16, 22, 44, 0.5) 30%);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: clamp(1.6rem, 3.5vw, 2.8rem);
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: clamp(1.8rem, 4vw, 3.2rem);
+    }
+    /* Amber top hairline — amber marks the one featured thing on the site */
+    .thesis-panel::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: 8%; right: 8%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(232, 164, 107, 0.75), transparent);
+    }
+    @media (max-width: 899px) { .thesis-panel { grid-template-columns: 1fr; } }
+
+    .featured-tag {
+      display: inline-block;
+      font: 500 0.6rem var(--mono);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      border: 1px solid rgba(232, 164, 107, 0.35);
+      border-radius: 999px;
+      padding: 0.3rem 0.75rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .thesis-body p { font-weight: 300; }
+
+    .contribs {
+      margin: 1.4rem 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 0.6rem;
+    }
+    .contribs li {
+      position: relative;
+      padding-left: 1.4rem;
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--ink-3);
+    }
+    .contribs li::before {
+      content: '▹';
+      position: absolute;
+      left: 0;
+      color: var(--mint);
+    }
+
+    .thesis-ctas { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 2rem; }
+
+    .thesis-side { display: flex; flex-direction: column; gap: 1.4rem; }
+    #e8-mini {
+      width: 100%;
+      max-width: 300px;
+      aspect-ratio: 1;
+      margin-inline: auto;
+      display: block;
+    }
+    .mini-caption {
+      text-align: center;
+      margin: -0.6rem 0 0;
+      font: 400 0.58rem var(--mono);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .speed-block {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.1rem 1.2rem;
+      background: rgba(10, 15, 38, 0.5);
+    }
+    .speed-head {
+      font: 500 0.6rem var(--mono);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+    }
+    .speed-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.5rem 0;
+      border-top: 1px solid var(--line);
+      font: 400 0.72rem var(--mono);
+      color: var(--ink-3);
+    }
+    .speed-row strong {
+      font: 500 1.05rem var(--mono);
+      color: var(--mint);
+    }
+    .speed-note {
+      margin: 0.7rem 0 0;
+      font: 400 0.62rem/1.6 var(--mono);
+      color: var(--muted);
+    }
+
+    .themes-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.8rem;
+      margin-top: 2rem;
+    }
+
+    /* ============================================================
+       §03 Experience — vertical timeline
+       ============================================================ */
+    .timeline {
+      list-style: none;
+      margin: 0;
+      padding: 0.2rem 0 0;
+      position: relative;
+      max-width: 46rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 6px; bottom: 6px;
+      width: 1px;
+      background: linear-gradient(180deg, rgba(110,231,199,0.4), rgba(110,231,199,0.05));
+    }
+    .t-entry { position: relative; padding-left: 2.3rem; }
+    .t-entry + .t-entry { margin-top: 2.8rem; }
+    .t-entry::before {
+      content: '';
+      position: absolute;
+      left: -4px; top: 5px;
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--bg-lo);
+      border: 1px solid var(--mint);
+      box-shadow: 0 0 8px rgba(110, 231, 199, 0.4);
+    }
+    .t-date {
+      font: 500 0.64rem var(--mono);
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      margin-bottom: 0.45rem;
+    }
+    .t-entry h3 { font-size: 1.2rem; font-weight: 400; }
+    .t-org {
+      font: 400 0.72rem var(--mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin: 0.3rem 0 0.7rem;
+    }
+    .t-entry p { font-weight: 300; font-size: 0.94rem; color: var(--ink-3); max-width: 40rem; }
+
+    /* ============================================================
+       §04 Projects — filterable card grid
+       ============================================================ */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .filter {
+      font: 500 0.66rem var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      background: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.55rem 1rem;
+      cursor: pointer;
+      transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    }
+    .filter:hover { color: var(--mint); border-color: rgba(110, 231, 199, 0.4); }
+    .filter.is-active {
+      color: var(--mint);
+      border-color: rgba(110, 231, 199, 0.55);
+      background: rgba(110, 231, 199, 0.07);
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: rgba(16, 22, 44, 0.55);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.4rem 1.5rem;
+      transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      border-color: rgba(110, 231, 199, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 36px rgba(3, 6, 16, 0.55);
+    }
+
+    .project { position: relative; display: flex; flex-direction: column; gap: 0.9rem; }
+    .project.is-hidden { display: none; }
+    @media (prefers-reduced-motion: no-preference) {
+      .project.pop { animation: card-in 0.45s ease both; }
+      @keyframes card-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: none; }
+      }
+    }
+    .project h3 { font-size: 1.1rem; font-weight: 400; }
+    .project-main-link { color: var(--ink); }
+    .project-main-link:hover { color: var(--mint); text-decoration: none; }
+    .project-main-link::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+    }
+    .project:has(.project-main-link:focus-visible) {
+      border-color: rgba(110, 231, 199, 0.55);
+    }
+    .p-description {
+      color: var(--ink-3);
+      font-size: 0.88rem;
+      font-weight: 300;
+      line-height: 1.6;
+      margin: 0;
+    }
+    .p-date {
+      font: 500 0.62rem var(--mono);
+      letter-spacing: 0.18em;
+      color: var(--muted);
+    }
+    .p-link {
+      align-self: flex-start;
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font: 500 0.64rem var(--mono);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .p-link svg { width: 11px; height: 11px; }
+    .p-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem 1.2rem;
+      margin-top: auto;
+    }
+
+    /* Competitions strip */
+    .comps {
+      margin-top: 3.2rem;
+      padding-top: 1.6rem;
+      border-top: 1px solid var(--line);
+    }
+    .comps-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 0;
+      margin: 0.8rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .comps-list li {
+      font: 400 0.68rem var(--mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+    .comps-list li:not(:last-child)::after {
+      content: '·';
+      color: var(--mint);
+      padding: 0 0.9rem;
+    }
+
+    /* ============================================================
+       §05 Capabilities — tagged clusters (no proficiency bars)
+       ============================================================ */
+    .cap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+    }
+    .cap-card h3 {
+      font: 500 0.66rem var(--mono);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--mint);
+      margin-bottom: 1.1rem;
+    }
+
+    /* ============================================================
+       §06 Education
+       ============================================================ */
+    .edu-entry {
+      display: grid;
+      grid-template-columns: 11rem 1fr;
+      gap: 2rem;
+      padding: 2.2rem 0;
+      border-top: 1px solid var(--line);
+    }
+    .edu-entry:last-of-type { border-bottom: 1px solid var(--line); }
+    @media (max-width: 720px) { .edu-entry { grid-template-columns: 1fr; gap: 0.7rem; } }
+    .edu-date {
+      font: 500 0.64rem var(--mono);
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      padding-top: 0.35rem;
+    }
+    .edu-entry h3 { font-size: 1.25rem; font-weight: 400; }
+    .edu-org {
+      font: 400 0.72rem var(--mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin: 0.35rem 0 0.8rem;
+    }
+    .edu-note { font-weight: 300; font-size: 0.94rem; color: var(--ink-3); margin-bottom: 1rem; }
+    .edu-label {
+      font: 500 0.6rem var(--mono);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.55rem;
+    }
+
+    /* ============================================================
+       §07 Contact
+       ============================================================ */
+    .contact-box { max-width: 40rem; }
+    .contact-email {
+      display: inline-block;
+      font: 400 clamp(1.05rem, 3.4vw, 1.6rem)/1.4 var(--mono);
+      letter-spacing: 0.01em;
+      color: var(--mint);
+      margin: 1.4rem 0 2rem;
+      word-break: break-all;
+      border-bottom: 1px solid var(--line-mint);
+      padding-bottom: 0.3rem;
+    }
+    .contact-email:hover { text-decoration: none; border-bottom-color: var(--mint); }
+    .contact-links { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+
+    /* ============================================================
+       Footer
+       ============================================================ */
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 2.2rem 0 2.6rem;
+    }
+    .foot-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.8rem 2rem;
+    }
+    .foot-row span, .foot-row a {
+      font: 400 0.62rem var(--mono);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .foot-row a:hover { color: var(--mint); text-decoration: none; }
+
+    /* ============================================================
+       Reduced motion — everything stops
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .js .reveal { opacity: 1; transform: none; }
+    }
+  </style>
 </head>
 
 <body>
+  <a class="skip" href="#main">Skip to content</a>
 
-  <!-- ======= Mobile nav toggle button ======= -->
-  <i class="bi bi-list mobile-nav-toggle d-xl-none"></i>
-
-  <!-- ======= Header ======= -->
-  <header id="header">
-    <div class="d-flex flex-column">
-
-      <div class="profile">
-        <img src="assets/img/profile-img.JPEG" alt="" class="img-fluid rounded-circle">
-        <h1 class="text-light"><a href="index.html">Maximilian Adam</a></h1>
-        <div class="social-links mt-3 text-center">
-          <a href="https://github.com/Maximilian-Adam" class="github" target="_blank"><i class="bx bxl-github"></i></a>
-          <a href="https://www.linkedin.com/in/maximilian-adam-509419222/" class="linkedin" target="_blank"><i class="bx bxl-linkedin"></i></a>
-          <a href="./assets/pdfs/Maximilian_Adam_CV.pdf" class="pdf" target="_blank"><i class="bx bxs-file-pdf" ></i></a>
-        </div>
-      </div>
-
-      <nav id="navbar" class="nav-menu navbar">
-        <ul>
-          <li><a href="#hero" class="nav-link scrollto active"><i class="bx bx-home"></i> <span>Home</span></a></li>
-          <li><a href="#about" class="nav-link scrollto"><i class="bx bx-user"></i> <span>About</span></a></li>
-          <li><a href="#resume" class="nav-link scrollto"><i class="bx bx-file-blank"></i> <span>Resume</span></a></li>
-          <li><a href="#portfolio" class="nav-link scrollto"><i class="bx bx-book-content"></i> <span>Projects</span></a></li>
-          <!--<li><a href="#testimonials" class="nav-link scrollto"><i class="bx bx-server"></i> <span>Testimonials</span></a></li>-->
-          <li><a href="#contact" class="nav-link scrollto"><i class="bx bx-envelope"></i> <span>Contact</span></a></li>
+  <!-- ======================= Top navigation ======================= -->
+  <header class="site-nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#hero">MAXIMILIAN·ADAM</a>
+      <nav aria-label="Primary">
+        <ul class="nav-links" id="nav-menu">
+          <li><a href="#about">About</a></li>
+          <li><a href="#research">Research</a></li>
+          <li><a href="#experience">Experience</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#capabilities">Capabilities</a></li>
+          <li><a href="#education">Education</a></li>
+          <li><a href="#contact">Contact</a></li>
         </ul>
-      </nav><!-- .nav-menu -->
+      </nav>
+      <button class="menu-btn" aria-expanded="false" aria-controls="nav-menu">Menu</button>
     </div>
-  </header><!-- End Header -->
+  </header>
 
-  <!-- ======= Hero Section ======= -->
-  <section id="hero" class="d-flex flex-column justify-content-center align-items-center">
-    <div class="hero-container" data-aos="fade-in">
-      <h1>Maximilian Adam</h1>
-      <p>I'm a <span class="typed" data-typed-items="Computer Engineering Student, Aspiring Cryptography Researcher, Pianist"></span></p>
-    </div>
-  </section><!-- End Hero -->
+  <!-- Observatory rail: current section + scroll progress (decorative duplicate) -->
+  <div class="rail" aria-hidden="true">
+    <div class="rail-track"><div class="rail-fill"></div></div>
+    <span class="rail-label">§00 · Intro</span>
+  </div>
 
   <main id="main">
 
-    <!-- ======= About Section ======= -->
-    <section id="about" class="about section-bg-dark">
-      <div class="container">
+    <!-- ======================= Hero ======================= -->
+    <section class="hero" id="hero" data-rail="§00 · Intro" aria-label="Introduction">
+      <canvas id="e8-canvas" aria-hidden="true"></canvas>
 
-        <div class="section-title">
-          <h2>About</h2>
-          <p>Hello! I'm Max, a 4<sup>th</sup> year MEng EIE student at Imperial College London, on track for a First. I focus on cryptography, secure and verifiable computation in particular. This motivation came about after an internship at Veriphi Labs where I worked on a research engineering project motivated by verifiable constraints on AI agents: how to enforce simple “allowed/forbidden” checks when the underlying evidence is distributed across multiple parties and must remain private</p>
-          <p style="padding-top: 0.5rem;">I am currently working on my master's thesis exploring post-quantum signatures by instantiating HAWK with remarkable lattices, aiming for faster sampling and strong security.</p>
-          <p style="padding-top: 0.5rem;"> Away from Academia I love playing the piano, and am currently working on Morceaux de fantaisie, Op. 3: No. 1, Elegie in E-Flat Minor by Sergei Rachmaninoff. Physically I enjoy bouldering and boxing, loving the mental flexibility that is required to excel at both.</p>
-          <p style="padding-top: 0.5rem;"> If we grab coffee, I’ll probably talk about why verifiable computation should be built into everyday systems, the growing need to transition to post quantum cryptography for secure communication, or the risks of unsecured autonomous agents. Always happy to chat or collaborate.</p>
-        </div>
+      <div class="wrap">
+        <div class="hero-copy">
+          <p class="micro hero-eyebrow">Imperial College London — MEng EIE — 1st </p>
+          <h1>Maximilian Adam</h1>
+          <p class="hero-line">Researching verifiable, post-quantum systems. Woking on building the future of secure agents.</p>
 
-        <div class="row">
-          <div class="col-lg-4" data-aos="fade-right">
-            <img src="assets/img/profile-img.JPEG" class="img-fluid rounded" alt="">
-          </div>
-          <div class="col-lg-8 pt-4 pt-lg-0 content" data-aos="fade-left">
-            <h3>Hi</h3>
-            <div class="row">
-              <div class="col-lg-6">
-                <ul>
-                  <li><i class="bi bi-chevron-right"></i> <strong>Website:</strong> <span>Maximilian-Adam.github.io</span></li>
-                  <li><i class="bi bi-chevron-right"></i> <strong>University:</strong> <span>Imperial College London</span></li>
-                  <li><i class="bi bi-chevron-right"></i> <strong>Location:</strong> <span>London, UK</span></li>
-                  <li><i class="bi bi-chevron-right"></i> <strong>Availability:</strong> <span>Applying for cryptography PhD</span></li>
-                </ul>
-              </div>
-              <div class="col-lg-6">
-                <ul>
-                  <li><i class="bi bi-chevron-right"></i> <strong>Degree:</strong> <span>MEng Electronic &amp; Information Engineering</span></li>
-                  <li><i class="bi bi-chevron-right"></i> <strong>Email:</strong> <span>maximilian.adam22@imperial.ac.uk</span></li>
-                  <li><i class="bi bi-chevron-right"></i> <strong>Interests:</strong> <span>FHE, verifiable computation, PQS</span></li>
-                  <li><i class="bi bi-chevron-right"></i> <strong>Favourite piece:</strong> <span>Rachmaninoff - &Eacute;l&eacute;gie</span></li>
-                </ul>
-              </div>
-            </div>
-            <p style="padding-top: 0.5rem;">I love learning and take every opportunity available to expand my knowledge. Then when taking that learning and applying it to ideas that will have an impact on us and possibly the way we live is what I strive for. If you have any opportunities or ideas worth talking about please reach out to me via Email or LinkedIn.</p>
+          <dl class="telemetry">
+            <div class="tele-row"><dt>Focus</dt><dd>Verifiable computation &amp; agents </dd></div>
+            <div class="tele-row"><dt>Thesis</dt><dd>HAWK · E8 lattice</dd></div>
+            <div class="tele-row"><dt>Status</dt><dd><span class="pulse-dot" aria-hidden="true"></span>Joining · Outerlimit</dd></div>
+          </dl>
+
+          <div class="hero-ctas">
+            <a class="btn btn-solid" href="#research">View research</a>
+            <a class="btn" href="./assets/pdfs/Maximilian_Adam_CV.pdf" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+              Download CV
+            </a>
           </div>
         </div>
-
       </div>
-    </section><!-- End About Section -->
 
-    <!-- ======= Facts Section ======= 
-    <section id="facts" class="facts">
-      <div class="container">
+      <p class="canvas-caption">E8 root system · 240 roots · 8 rings of 30</p>
+      <div class="scroll-hint" aria-hidden="true">Scroll</div>
+    </section>
 
-        <div class="section-title">
-          <h2>Facts</h2>
-          <p>Magnam dolores commodi suscipit. Necessitatibus eius consequatur ex aliquid fuga eum quidem. Sit sint consectetur velit. Quisquam quos quisquam cupiditate. Et nemo qui impedit suscipit alias ea. Quia fugiat sit in iste officiis commodi quidem hic quas.</p>
+    <!-- ======================= §01 About ======================= -->
+    <section id="about" data-rail="§01 · About" aria-labelledby="about-h">
+      <div class="wrap">
+        <div class="eyebrow reveal">
+          <span class="eyebrow-id">§01</span>
+          <span class="eyebrow-name">About</span>
+          <span class="eyebrow-rule"></span>
         </div>
 
-        <div class="row no-gutters">
-
-          <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch" data-aos="fade-up">
-            <div class="count-box">
-              <i class="bi bi-emoji-smile"></i>
-              <span data-purecounter-start="0" data-purecounter-end="232" data-purecounter-duration="1" class="purecounter"></span>
-              <p><strong>Happy Clients</strong> consequuntur quae</p>
-            </div>
+        <div class="about-grid">
+          <div class="about-copy reveal">
+            <h2 id="about-h">Hi, I'm Max.</h2>
+            <p>I have recently completed my MEng in Electronic &amp; Information Engineering at Imperial College London, achieving a First and 86.3% for my final thesis. I focus on cryptography, secure and verifiable computation in particular. That focus came out of an internship at <strong>Veriphi Labs</strong>, working on verifiable constraints for AI agents: how to enforce simple allowed/forbidden checks when the underlying evidence is distributed across multiple parties and must stay private.</p>
+            <p>I'm currently preparing to join outerlimit having written my master's thesis on <strong>post-quantum signatures</strong>, instantiating HAWK with the remarkable lattice E8 to achieve faster sampling while maintaining strong security.</p>
+            <p>Away from academia I play the piano (currently learning Rachmaninoff's Élégie in E-flat minor, Op. 3 No. 1), and I boulder and box. I love the mental flexibility both demand. </p>
           </div>
 
-          <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch" data-aos="fade-up" data-aos-delay="100">
-            <div class="count-box">
-              <i class="bi bi-journal-richtext"></i>
-              <span data-purecounter-start="0" data-purecounter-end="521" data-purecounter-duration="1" class="purecounter"></span>
-              <p><strong>Projects</strong> adipisci atque cum quia aut</p>
+          <aside class="facts-panel reveal" style="--d: 0.1s" aria-label="Quick facts">
+            <div class="panel-head">
+              <span class="micro">Readout</span>
+              <span class="micro">IC · LDN</span>
             </div>
-          </div>
-
-          <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch" data-aos="fade-up" data-aos-delay="200">
-            <div class="count-box">
-              <i class="bi bi-headset"></i>
-              <span data-purecounter-start="0" data-purecounter-end="1453" data-purecounter-duration="1" class="purecounter"></span>
-              <p><strong>Hours Of Support</strong> aut commodi quaerat</p>
-            </div>
-          </div>
-
-          <div class="col-lg-3 col-md-6 d-md-flex align-items-md-stretch" data-aos="fade-up" data-aos-delay="300">
-            <div class="count-box">
-              <i class="bi bi-people"></i>
-              <span data-purecounter-start="0" data-purecounter-end="32" data-purecounter-duration="1" class="purecounter"></span>
-              <p><strong>Hard Workers</strong> rerum asperiores dolor</p>
-            </div>
-          </div>
-
+            <dl class="facts">
+              <div><dt>University</dt><dd>Imperial College London</dd></div>
+              <div><dt>Location</dt><dd>London, UK</dd></div>
+              <div><dt>Degree</dt><dd>MEng Electronic &amp; Information Engineering</dd></div>
+              <div><dt>Availability</dt><dd>Joining Outerlimit</dd></div>
+              <div><dt>Interests</dt><dd>FHE · Verifiable computation · Post-quantum signatures</dd></div>
+              <div><dt>Favourite piece</dt><dd>Prokofiev, Concerto No. 2</dd></div>
+            </dl>
+          </aside>
         </div>
-
       </div>
-    </section> End Facts Section -->
+    </section>
 
-    <!-- ======= Skills Section ======= -->
-    <section id="skills" class="skills section-bg">
-      <div class="container">
-
-        <div class="section-title">
-          <h2>Skills</h2>
+    <!-- ======================= §02 Research (featured) ======================= -->
+    <section id="research" data-rail="§02 · Research" aria-labelledby="research-h">
+      <div class="wrap">
+        <div class="eyebrow reveal">
+          <span class="eyebrow-id amber">§02</span>
+          <span class="eyebrow-name">Research</span>
+          <span class="eyebrow-rule"></span>
         </div>
 
-        <div class="row skills-content">
-
-          <div class="col-lg-6" data-aos="fade-up">
-
-            <div class="progress">
-              <span class="skill">Python (Pandas, Scikit-Learn, PyTorch, TensorFlow) <i class="val">90%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-
-            <div class="progress">
-              <span class="skill">C++ &amp; Systems Programming <i class="val">85%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-
-            <div class="progress">
-              <span class="skill">Machine Learning &amp; Statistical Modelling <i class="val">90%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-
-            <div class="progress">
-              <span class="skill">Cryptography &amp; Coding Theory <i class="val">75%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
-
-            <div class="progress">
-              <span class="skill">Simulation &amp; Modelling (Lua/C++) <i class="val">80%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-
-            <div class="progress">
-              <span class="skill">Data Visualisation &amp; Analytics <i class="val">85%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-
-            <div class="progress">
-              <span class="skill">Hardware &amp; RISC-V (Verilog) <i class="val">70%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-
-            <div class="progress">
-              <span class="skill">SQL &amp; Data Engineering <i class="val">75%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-
-
-          </div>
-
+        <div class="reveal">
+          <h2 id="research-h">Improved signatures from instantiating HAWK with a remarkable lattice</h2>
+          <p class="thesis-meta">MEng thesis · Imperial College London<span class="sep">—</span>Supervised by Prof. C. Ling &amp; M. Lie<span class="sep">—</span>2026</p>
         </div>
 
+        <div class="thesis-panel reveal">
+          <div class="thesis-body">
+            <span class="featured-tag">Master's thesis</span>
+            <p>HAWK is a leading post-quantum signature scheme whose signing cost is dominated by discrete Gaussian sampling over structured lattice cosets. My thesis asks whether <strong>E8</strong>, the exceptionally symmetric eight-dimensional lattice rendered above, can make that sampling faster without breaking HAWK's signing and verification interface.</p>
+            <p>It turns out this is a scheme design problem, not a drop in sampler swap. The result is <strong>HAWK-E8-CM</strong>: a coset matched HAWK variant with a modified public quadratic form, backed by a proof of concept implementation.</p>
+            <ul class="contribs">
+              <li>Identified a congruence defined ℤ[ζ₈] module as a scaled copy of E8, with an explicit module basis</li>
+              <li>Embedded it into HAWK's cyclotomic ring as repeated blocks, underlying lattice (2E8)<sup>⊕n/4</sup></li>
+              <li>Showed HAWK's coefficient wise mod-2 interface loses the E8 coset structure, and built the internal coset matching interface that fixes it</li>
+              <li>Implemented and benchmarked a blockwise, parallel E8 sampler inside the full signing and verification path</li>
+            </ul>
+            <div class="thesis-ctas">
+              <a class="btn btn-solid" href="./assets/pdfs/Maximilian_Adam_HAWK_E8_Thesis.pdf" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                Read the paper
+              </a>
+              <a class="btn" href="https://github.com/Maximilian-Adam/hawk_e8" target="_blank" rel="noopener">
+                <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+                Code · hawk_e8
+              </a>
+            </div>
+          </div>
+
+          <div class="thesis-side">
+            <div>
+              <canvas id="e8-mini" aria-hidden="true"></canvas>
+              <p class="mini-caption">The lattice in question</p>
+            </div>
+            <div class="speed-block">
+              <p class="speed-head">Median sampler speedup vs HAWK</p>
+              <div class="speed-row"><span>n = 256</span><strong>4.32×</strong></div>
+              <div class="speed-row"><span>n = 512</span><strong>5.31×</strong></div>
+              <div class="speed-row"><span>n = 1024</span><strong>7.12×</strong></div>
+              <p class="speed-note">Standalone sampler benchmarks, HAWK-E8-CM prototype.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="themes-row reveal">
+          <span class="micro">Themes</span>
+          <ul class="chips">
+            <li class="chip">Post-quantum cryptography</li>
+            <li class="chip">Verifiable computation</li>
+          </ul>
+        </div>
       </div>
-    </section><!-- End Skills Section -->
+    </section>
 
-    <!-- ======= Resume Section ======= -->
-    <section id="resume" class="resume section-bg-dark">
-      <div class="container">
-
-        <div class="section-title">
-          <h2>Resume</h2>
-          <!--Comments-->
+    <!-- ======================= §03 Experience ======================= -->
+    <section id="experience" data-rail="§03 · Experience" aria-labelledby="experience-h">
+      <div class="wrap">
+        <div class="eyebrow reveal">
+          <span class="eyebrow-id">§03</span>
+          <span class="eyebrow-name">Experience</span>
+          <span class="eyebrow-rule"></span>
         </div>
+        <h2 id="experience-h" class="reveal">Field log</h2>
 
-        <div class="row">
-          <div class="col-lg-6" data-aos="fade-up">
-            <h3 class="resume-title">Education</h3>
-            <div class="resume-item">
-              <h4>MEng Electronic &amp; Information Engineering</h4>
-              <h5>Oct 2022 - May 2026</h5>
-              <p><em>Imperial College London, London, UK</em></p>
-              <ul>
-                <li>On track for a First.</li>
-                <li>Relevant modules: Cryptography &amp; Coding Theory, Deep Learning, Statistical Signal Processing.</li>
-              </ul>
-            </div>
-            <div class="resume-item">
-              <h4>A Levels</h4>
-              <h5>July 2022</h5>
-              <p><em>Highgate School, London, UK</em></p>
-              <ul>
-                <li>Further Mathematics A*, Physics A*, Chemistry A*, Mathematics A*.</li>
-                <li>President of Engineering Society.</li>
-              </ul>
-            </div>
-            <h3 class="resume-title">Projects &amp; Competitions</h3>
-            <div class="resume-item">
-              <h4>Selected Work</h4>
-              <ul>
-                <li>Built and documented a C compiler, reinforcement-learning in-hand manipulator, neural network mini-library, balancing robot, and RISC-V CPU in Verilog.</li>
-                <li>Experimented with LSTMs, transformers, GBMs, and YOLO models across research projects.</li>
-                <li>Active in IBM's Hackathon, Jane Street's Monthly Puzzles, IC Hack, Imperial Algothon, Citadel Correlation One, and Numerai's Data Science Tournament.</li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
-            <h3 class="resume-title">Professional Experience</h3>
-            <div class="resume-item">
-              <h4>Research Intern</h4>
-              <h5>August 2025 - September 2025</h5>
-              <p><em>Veriphi Labs, London, England</em></p>
-              <ul>
-                <li>Worked on fully homomorphic encryption for multi-party computation (MPC).</li>
-              </ul>
-            </div>
-            <div class="resume-item">
-              <h4>Simulation/Data Analyst Intern</h4>
-              <h5>August 2024 - September 2024</h5>
-              <p><em>Nova Systems International, Farnborough, England</em></p>
-              <ul>
-                <li>Simulated highly complex conflict scenarios and decision pipelines.</li>
-                <li>Built GPS and satellite simulations using Lua and C++.</li>
-              </ul>
-            </div>
-            <div class="resume-item">
-              <h4>Machine Learning Intern</h4>
-              <h5>August 2023 - September 2023</h5>
-              <p><em>Tekever, Southampton, England</em></p>
-              <ul>
-                <li>Improved drone-view people detection F1 score by 15% through domain adaptation.</li>
-                <li>Strengthened model robustness via data cleaning, transformation, and visualisation with Pandas, Scikit-learn, NumPy, and FiftyOne.</li>
-                <li>Collaborated with the team to define and deliver performance targets, documenting outcomes.</li>
-              </ul>
-            </div>
-            <div class="resume-item">
-              <h4>Data Analyst Intern</h4>
-              <h5>June 2023 - July 2023</h5>
-              <p><em>Williams Grand Prix Engineering, Grove, England </em></p>
-              <ul>
-                <li>Developed a tool to visualise wind tunnel data across key aero metrics.</li>
-                <li>Delivered real-time streaming of car simulation data into Excel for performance analysis.</li>
-                <li>Co-developed a platform to improve the manufacturing pipeline and presented it to internal teams.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
+        <ol class="timeline">
+          <li class="t-entry reveal">
+            <p class="t-date">Aug 2025 — Sep 2025</p>
+            <h3>Research Intern</h3>
+            <p class="t-org">Veriphi Labs · London</p>
+            <p>Fully homomorphic encryption for multi party computation (MPC).</p>
+          </li>
+          <li class="t-entry reveal">
+            <p class="t-date">Aug 2024 — Sep 2024</p>
+            <h3>Simulation / Data Analyst Intern</h3>
+            <p class="t-org">Nova Systems International · Farnborough</p>
+            <p>Simulated complex conflict scenarios and decision pipelines; built GPS and satellite simulations in Lua and C++.</p>
+          </li>
+          <li class="t-entry reveal">
+            <p class="t-date">Aug 2023 — Sep 2023</p>
+            <h3>Machine Learning Intern</h3>
+            <p class="t-org">Tekever · Southampton</p>
+            <p>Improved drone view people detection F1 by 15% via domain adaptation; strengthened model robustness through data cleaning and visualisation.</p>
+          </li>
+          <li class="t-entry reveal">
+            <p class="t-date">Jun 2023 — Jul 2023</p>
+            <h3>Data Analyst Intern</h3>
+            <p class="t-org">Williams Grand Prix Engineering · Grove</p>
+            <p>Built a wind tunnel data visualisation tool across key aero metrics; streamed car simulation data into Excel in real time; co-developed a manufacturing pipeline platform.</p>
+          </li>
+        </ol>
       </div>
-    </section><!-- End Resume Section -->
+    </section>
 
-    <!-- ======= Portfolio Section ======= -->
-    <section id="portfolio" class="portfolio section-bg">
-      <div class="container">
+    <!-- ======================= §04 Projects ======================= -->
+    <section id="projects" data-rail="§04 · Projects" aria-labelledby="projects-h">
+      <div class="wrap">
+        <div class="eyebrow reveal">
+          <span class="eyebrow-id">§04</span>
+          <span class="eyebrow-name">Projects</span>
+          <span class="eyebrow-rule"></span>
+        </div>
+        <h2 id="projects-h" class="reveal">Built &amp; shipped</h2>
 
-        <div class="section-title">
-          <h2>Projects</h2>
-          <p>These are some of the projects I have worked on in my time at university</p>
+        <div class="filters reveal" role="group" aria-label="Filter projects by technology">
+          <button class="filter is-active" aria-pressed="true" data-filter="all">All</button>
+          <button class="filter" aria-pressed="false" data-filter="cpp">C++</button>
+          <button class="filter" aria-pressed="false" data-filter="python">Python</button>
+          <button class="filter" aria-pressed="false" data-filter="hardware">Hardware</button>
+          <button class="filter" aria-pressed="false" data-filter="networks">Networks</button>
         </div>
 
-        <div class="row" data-aos="fade-up">
-          <div class="col-lg-12 d-flex justify-content-center">
-            <ul id="portfolio-flters">
-              <li data-filter="*" class="filter-active">All</li>
-              <li data-filter=".filter-cpp">C++</li>
-              <li data-filter=".filter-python">Python</li>
-              <li data-filter=".filter-hardware">Hardware</li>
-              <li data-filter=".filter-networks">Networks</li>
+        <div class="projects-grid">
+          <article class="card project reveal" data-tags="python rl hardware">
+            <p class="p-date">Apr — Jun 2025</p>
+            <h3><a class="project-main-link" href="https://github.com/Maximilian-Adam/D-PALI/tree/main" target="_blank" rel="noopener" aria-label="View D-PALI 3D on GitHub">D-PALI 3D</a></h3>
+            <p class="p-description">Extended the D-PALI gripper into full 3D manipulation, redesigning its linkage and finger bases before training TD3 policies in MuJoCo to move and orient a cube.</p>
+            <ul class="chips">
+              <li class="chip">Python</li><li class="chip">RL</li><li class="chip">Hardware</li>
+            </ul>
+            <div class="p-actions">
+              <a class="p-link" href="./assets/pdfs/D_Pali_Report.pdf" target="_blank" rel="noopener">Report <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+              <a class="p-link" href="https://github.com/Maximilian-Adam/D-PALI/tree/main" target="_blank" rel="noopener">GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+            </div>
+          </article>
+
+          <article class="card project reveal" style="--d: 0.05s" data-tags="cpp python hardware">
+            <p class="p-date">Apr — Jun 2024</p>
+            <h3><a class="project-main-link" href="https://github.com/Maximilian-Adam/BalanceRobot" target="_blank" rel="noopener" aria-label="View Balance Robot on GitHub">Balance Robot</a></h3>
+            <p class="p-description">Built a two wheeled self balancing robot with cascaded PID control, Raspberry Pi vision, autonomous target following, and a Flask interface for telemetry and manual control.</p>
+            <ul class="chips">
+              <li class="chip">C++</li><li class="chip">Python</li><li class="chip">Hardware</li>
+            </ul>
+            <div class="p-actions">
+              <a class="p-link" href="./assets/pdfs/BalanceRobot.pdf" target="_blank" rel="noopener">Report <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+              <a class="p-link" href="https://github.com/Maximilian-Adam/BalanceRobot" target="_blank" rel="noopener">GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+            </div>
+          </article>
+
+          <article class="card project reveal" style="--d: 0.1s" data-tags="cpp riscv">
+            <p class="p-date">Feb — Mar 2024</p>
+            <h3><a class="project-main-link" href="https://github.com/Arc-Cloud/Caleidos_C_Compiler" target="_blank" rel="noopener" aria-label="View Caleidos C Compiler on GitHub">Caleidos C Compiler</a></h3>
+            <p class="p-description">Created a C90 to RISC-V compiler supporting arrays, control flow, function calls and recursion, pointers, strings, structures, and a broad range of integer operations.</p>
+            <ul class="chips">
+              <li class="chip">C++</li><li class="chip">RISC-V</li>
+            </ul>
+            <div class="p-actions">
+              <a class="p-link" href="https://github.com/Arc-Cloud/Caleidos_C_Compiler" target="_blank" rel="noopener">GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+            </div>
+          </article>
+
+          <article class="card project reveal" style="--d: 0.15s" data-tags="python systemverilog networks">
+            <p class="p-date">Feb — Mar 2024</p>
+            <h3><a class="project-main-link" href="https://github.com/Arc-Cloud/InfoProc_Proj" target="_blank" rel="noopener" aria-label="View Accelither on GitHub">Accelither</a></h3>
+            <p class="p-description">Developed a multiplayer slither.io style game controlled by custom FPGA hardware, using Pygame, TCP and Protobuf networking, Nios II, and DynamoDB.</p>
+            <ul class="chips">
+              <li class="chip">Python</li><li class="chip">SystemVerilog</li><li class="chip">Networks</li>
+            </ul>
+            <div class="p-actions">
+              <a class="p-link" href="./assets/pdfs/Accelither_Report.pdf" target="_blank" rel="noopener">Report <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+              <a class="p-link" href="https://github.com/Arc-Cloud/InfoProc_Proj" target="_blank" rel="noopener">GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+            </div>
+          </article>
+
+          <article class="card project reveal" style="--d: 0.2s" data-tags="systemverilog hardware riscv">
+            <p class="p-date">Nov — Dec 2023</p>
+            <h3><a class="project-main-link" href="https://github.com/Arc-Cloud/Team04-RISCV-Proj" target="_blank" rel="noopener" aria-label="View RISC-V CPU on GitHub">RISC-V CPU</a></h3>
+            <p class="p-description">Developed an RV32I-compliant CPU in SystemVerilog with caching, pipelining, a robust test suite, and thorough design documentation.</p>
+            <ul class="chips">
+              <li class="chip">SystemVerilog</li><li class="chip">Hardware</li><li class="chip">RISC-V</li>
+            </ul>
+            <div class="p-actions">
+              <a class="p-link" href="https://github.com/Arc-Cloud/Team04-RISCV-Proj" target="_blank" rel="noopener">GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+            </div>
+          </article>
+
+          <article class="card project reveal" style="--d: 0.25s" data-tags="cpp hardware networks">
+            <p class="p-date">May — Jun 2023</p>
+            <h3><a class="project-main-link" href="https://github.com/rolandocharles/Helionix-EEERover" target="_blank" rel="noopener" aria-label="View EEERover Helionix on GitHub">EEERover – Helionix</a></h3>
+            <p class="p-description">Created a three omni wheel rover that detected magnetic, infrared, and radio signals and sent them over TCP for decoding and display, placing first of 33 teams.</p>
+            <ul class="chips">
+              <li class="chip">C++</li><li class="chip">Hardware</li><li class="chip">Networks</li>
+            </ul>
+            <div class="p-actions">
+              <a class="p-link" href="./assets/pdfs/Rover_Report.pdf" target="_blank" rel="noopener">Report <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+              <a class="p-link" href="https://github.com/rolandocharles/Helionix-EEERover" target="_blank" rel="noopener">GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+            </div>
+          </article>
+        </div>
+
+        <div class="comps reveal">
+          <span class="micro">Selected competition activity</span>
+          <ul class="comps-list">
+            <li>IBM Hackathon</li>
+            <li>Jane Street Monthly Puzzles</li>
+            <li>IC Hack</li>
+            <li>Imperial Algothon</li>
+            <li>Citadel Correlation One</li>
+            <li>Numerai Data Science Tournament</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= §05 Capabilities ======================= -->
+    <section id="capabilities" data-rail="§05 · Capabilities" aria-labelledby="capabilities-h">
+      <div class="wrap">
+        <div class="eyebrow reveal">
+          <span class="eyebrow-id">§05</span>
+          <span class="eyebrow-name">Capabilities</span>
+          <span class="eyebrow-rule"></span>
+        </div>
+        <h2 id="capabilities-h" class="reveal">Instrumentation</h2>
+
+        <div class="cap-grid">
+          <div class="card cap-card reveal">
+            <h3>Languages</h3>
+            <ul class="chips">
+              <li class="chip">Python</li><li class="chip">C++</li><li class="chip">Lua</li>
+              <li class="chip">SQL</li><li class="chip">SystemVerilog</li>
+            </ul>
+          </div>
+          <div class="card cap-card reveal" style="--d: 0.05s">
+            <h3>Machine learning</h3>
+            <ul class="chips">
+              <li class="chip">Statistical modelling</li><li class="chip">PyTorch</li>
+              <li class="chip">TensorFlow</li><li class="chip">Scikit-learn</li>
+            </ul>
+          </div>
+          <div class="card cap-card reveal" style="--d: 0.1s">
+            <h3>Cryptography</h3>
+            <ul class="chips">
+              <li class="chip">Coding theory</li><li class="chip">Post-quantum signatures</li>
+              <li class="chip">FHE · MPC</li><li class="chip">Verifiable computation</li>
+            </ul>
+          </div>
+          <div class="card cap-card reveal" style="--d: 0.15s">
+            <h3>Systems &amp; hardware</h3>
+            <ul class="chips">
+              <li class="chip">C++ systems programming</li><li class="chip">RISC-V · Verilog</li>
+              <li class="chip">Simulation &amp; modelling</li>
+            </ul>
+          </div>
+          <div class="card cap-card reveal" style="--d: 0.2s">
+            <h3>Data</h3>
+            <ul class="chips">
+              <li class="chip">Visualisation &amp; analytics</li><li class="chip">SQL &amp; data engineering</li>
+              <li class="chip">Pandas · NumPy</li><li class="chip">FiftyOne</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= §06 Education ======================= -->
+    <section id="education" data-rail="§06 · Education" aria-labelledby="education-h">
+      <div class="wrap">
+        <div class="eyebrow reveal">
+          <span class="eyebrow-id">§06</span>
+          <span class="eyebrow-name">Education</span>
+          <span class="eyebrow-rule"></span>
+        </div>
+        <h2 id="education-h" class="reveal">Training data</h2>
+
+        <div class="edu-entry reveal">
+          <p class="edu-date">Oct 2022 — May 2026</p>
+          <div>
+            <h3>MEng Electronic &amp; Information Engineering</h3>
+            <p class="edu-org">Imperial College London</p>
+            <p class="edu-note">Achieved First Class Honours</p>
+            <p class="edu-label">Relevant modules</p>
+            <ul class="chips">
+              <li class="chip">Cryptography &amp; Coding Theory</li>
+              <li class="chip">Deep Learning</li>
+              <li class="chip">Statistical Signal Processing</li>
             </ul>
           </div>
         </div>
 
-        <div class="row portfolio-container" data-aos="fade-up" data-aos-delay="100">
-          <div class="col-lg-4 col-md-6 portfolio-item filter-hardware filter-python">
-            <a href="assets/projects/D-Pali-3D.html" data-gallery="portfolioDetailsGallery" data-glightbox="type: external" class="portfolio-details-lightbox" title="Portfolio Details">
-              <div class="portfolio-wrap">
-                <div class="portfolio-info">
-                  <h4>D-PALI 3D</h4>
-                  <h6>April 2025 - June 2025</h6>
-                  <img src="assets/img/portfolio/D-Pali-3D/GripperInAction.png" class="img-fluid" alt="">
-                  <ul>
-                    <li>Python</li>
-                    <li>RL</li>
-                    <li>Hardware</li>
-                  </ul>
-                </div>
-              </div>
-            </a>
+        <div class="edu-entry reveal">
+          <p class="edu-date">July 2022</p>
+          <div>
+            <h3>A Levels</h3>
+            <p class="edu-org">Highgate School</p>
+            <p class="edu-note">President of Engineering Society.</p>
+            <ul class="chips">
+              <li class="chip">Further Mathematics A*</li>
+              <li class="chip">Physics A*</li>
+              <li class="chip">Chemistry A*</li>
+              <li class="chip">Mathematics A*</li>
+            </ul>
           </div>
-
-          <div class="col-lg-4 col-md-6 portfolio-item filter-hardware filter-python">
-            <a href="assets/projects/BalanceRobot.html" data-gallery="portfolioDetailsGallery" data-glightbox="type: external" class="portfolio-details-lightbox" title="Portfolio Details">
-              <div class="portfolio-wrap">
-                <div class="portfolio-info">
-                  <h4>Balance Robot</h4>
-                  <h6>April 2024 - June 2024</h6>
-                  <img src="assets/img/portfolio/BalanceRobot/BalanceRobot.jpg" class="img-fluid" alt="">
-                  <ul>
-                    <li>C++</li>
-                    <li>Python</li>
-                    <li>Hardware</li>
-                  </ul>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="col-lg-4 col-md-6 portfolio-item filter-cpp">
-            <a href="assets/projects/Caleidos_Compiler.html" data-gallery="portfolioDetailsGallery" data-glightbox="type: external" class="portfolio-details-lightbox" title="Portfolio Details">
-              <div class="portfolio-wrap">
-                <div class="portfolio-info">
-                  <h4>Caleidos C Compiler</h4>
-                  <h6>February 2024 - March 2024</h6>
-                  <img src="assets/img/portfolio/Caleidos/caleidos_img1.png" class="img-fluid" alt="">
-                  <ul>
-                    <li>C++</li>
-                    <li>RISCV</li>
-                  </ul>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="col-lg-4 col-md-6 portfolio-item filter-networks filter-python">
-            <a href="assets/projects/Accelither.html" data-gallery="portfolioDetailsGallery" data-glightbox="type: external" class="portfolio-details-lightbox" title="Portfolio Details">
-              <div class="portfolio-wrap">
-                <div class="portfolio-info">
-                  <h4>Accelither</h4>
-                  <h6>February 2024 - March 2024</h6>
-                  <img src="assets/img/portfolio/Accelither/Accelither_img1.jpg" class="img-fluid" alt="">
-                  <ul>
-                    <li>Python</li>
-                    <li>System Verilog</li>
-                    <li>Networks</li>
-                  </ul>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="col-lg-4 col-md-6 portfolio-item filter-hardware">
-            <a href="assets/projects/RISCV_CPU.html" data-gallery="portfolioDetailsGallery" data-glightbox="type: external" class="portfolio-details-lightbox" title="Portfolio Details">
-              <div class="portfolio-wrap">
-                <div class="portfolio-info">
-                  <h4>RISC-V CPU</h4>
-                  <h6>November 2023 - December 2023</h6>
-                  <img src="assets/img/portfolio/RISC-V_CPU/CPU_img1.jpeg" class="img-fluid" alt="">
-                  <ul>
-                    <li>System Verilog</li>
-                    <li>Hardware</li>
-                    <li>RISC-V</li>
-                  </ul>
-                </div>
-              </div>
-            </a>
-          </div>
-
-
-          <div class="col-lg-4 col-md-6 portfolio-item filter-networks filter-cpp filter-networks filter-hardware">
-            <a href="assets/projects/rover.html" data-gallery="portfolioDetailsGallery" data-glightbox="type: external" class="portfolio-details-lightbox" title="Portfolio Details">
-              <div class="portfolio-wrap">
-                <div class="portfolio-info">
-                  <h4>EEERover - Helionix</h4>
-                  <h6>May 2023 - June 2023</h6>
-                  <img src="assets/img/portfolio/EEERover/browntest.jpeg" class="img-fluid" alt="">
-                  <ul>
-                    <li>C++</li>
-                    <li>Hardware</li>
-                    <li>Networks</li>
-                  </ul>
-                </div>
-              </div>
-            </a>
-          </div>
-
         </div>
-
       </div>
-    </section><!-- End Portfolio Sectison -->
+    </section>
 
-    <!-- ======= Services Section ======= 
-    <section id="services" class="services">
-      <div class="container">
-
-        <div class="section-title">
-          <h2>Services</h2>
-          <p>Magnam dolores commodi suscipit. Necessitatibus eius consequatur ex aliquid fuga eum quidem. Sit sint consectetur velit. Quisquam quos quisquam cupiditate. Et nemo qui impedit suscipit alias ea. Quia fugiat sit in iste officiis commodi quidem hic quas.</p>
+    <!-- ======================= §07 Contact ======================= -->
+    <section id="contact" data-rail="§07 · Contact" aria-labelledby="contact-h">
+      <div class="wrap">
+        <div class="eyebrow reveal">
+          <span class="eyebrow-id">§07</span>
+          <span class="eyebrow-name">Contact</span>
+          <span class="eyebrow-rule"></span>
         </div>
 
-        <div class="row">
-          <div class="col-lg-4 col-md-6 icon-box" data-aos="fade-up">
-            <div class="icon"><i class="bi bi-briefcase"></i></div>
-            <h4 class="title"><a href="">Lorem Ipsum</a></h4>
-            <p class="description">Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-          </div>
-          <div class="col-lg-4 col-md-6 icon-box" data-aos="fade-up" data-aos-delay="100">
-            <div class="icon"><i class="bi bi-card-checklist"></i></div>
-            <h4 class="title"><a href="">Dolor Sitema</a></h4>
-            <p class="description">Minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat tarad limino ata</p>
-          </div>
-          <div class="col-lg-4 col-md-6 icon-box" data-aos="fade-up" data-aos-delay="200">
-            <div class="icon"><i class="bi bi-bar-chart"></i></div>
-            <h4 class="title"><a href="">Sed ut perspiciatis</a></h4>
-            <p class="description">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</p>
-          </div>
-          <div class="col-lg-4 col-md-6 icon-box" data-aos="fade-up" data-aos-delay="300">
-            <div class="icon"><i class="bi bi-binoculars"></i></div>
-            <h4 class="title"><a href="">Magni Dolores</a></h4>
-            <p class="description">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</p>
-          </div>
-          <div class="col-lg-4 col-md-6 icon-box" data-aos="fade-up" data-aos-delay="400">
-            <div class="icon"><i class="bi bi-brightness-high"></i></div>
-            <h4 class="title"><a href="">Nemo Enim</a></h4>
-            <p class="description">At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque</p>
-          </div>
-          <div class="col-lg-4 col-md-6 icon-box" data-aos="fade-up" data-aos-delay="500">
-            <div class="icon"><i class="bi bi-calendar4-week"></i></div>
-            <h4 class="title"><a href="">Eiusmod Tempor</a></h4>
-            <p class="description">Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi</p>
+        <div class="contact-box reveal">
+          <h2 id="contact-h">Open a channel</h2>
+          <p style="font-weight: 300;">Joining outerlimit to pursue the future of agentic security. If you'd like to talk research, random ideas or collaboration, my inbox is open.</p>
+          <a class="contact-email" href="mailto:MaximilianJAdam@outlook.com">MaximilianJAdam@outlook.com</a>
+
+          <div class="contact-links">
+            <a class="btn" href="https://github.com/Maximilian-Adam" target="_blank" rel="noopener">
+              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+              GitHub
+            </a>
+            <a class="btn" href="https://www.linkedin.com/in/maximilian-adam-509419222/" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.72C24 .77 23.2 0 22.22 0z"/></svg>
+              LinkedIn
+            </a>
+            <a class="btn" href="./assets/pdfs/Maximilian_Adam_CV.pdf" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+              CV
+            </a>
           </div>
         </div>
-
       </div>
-    </section>End Services Section -->
+    </section>
+  </main>
 
-    <!-- ======= Testimonials Section ======= 
-    <section id="testimonials" class="testimonials section-bg">
-      <div class="container">
-
-        <div class="section-title">
-          <h2>Testimonials</h2>
-          <p>Magnam dolores commodi suscipit. Necessitatibus eius consequatur ex aliquid fuga eum quidem. Sit sint consectetur velit. Quisquam quos quisquam cupiditate. Et nemo qui impedit suscipit alias ea. Quia fugiat sit in iste officiis commodi quidem hic quas.</p>
-        </div>
-
-        <div class="testimonials-slider swiper" data-aos="fade-up" data-aos-delay="100">
-          <div class="swiper-wrapper">
-
-            <div class="swiper-slide">
-              <div class="testimonial-item" data-aos="fade-up">
-                <p>
-                  <i class="bx bxs-quote-alt-left quote-icon-left"></i>
-                  Proin iaculis purus consequat sem cure digni ssim donec porttitora entum suscipit rhoncus. Accusantium quam, ultricies eget id, aliquam eget nibh et. Maecen aliquam, risus at semper.
-                  <i class="bx bxs-quote-alt-right quote-icon-right"></i>
-                </p>
-                <img src="assets/img/testimonials/testimonials-1.jpg" class="testimonial-img" alt="">
-                <h3>Saul Goodman</h3>
-                <h4>Ceo &amp; Founder</h4>
-              </div>
-            </div><-- End testimonial item -->
-            <!--
-
-            <div class="swiper-slide">
-              <div class="testimonial-item" data-aos="fade-up" data-aos-delay="100">
-                <p>
-                  <i class="bx bxs-quote-alt-left quote-icon-left"></i>
-                  Export tempor illum tamen malis malis eram quae irure esse labore quem cillum quid cillum eram malis quorum velit fore eram velit sunt aliqua noster fugiat irure amet legam anim culpa.
-                  <i class="bx bxs-quote-alt-right quote-icon-right"></i>
-                </p>
-                <img src="assets/img/testimonials/testimonials-2.jpg" class="testimonial-img" alt="">
-                <h3>Sara Wilsson</h3>
-                <h4>Designer</h4>
-              </div>
-            </div><-- End testimonial item -->
-            <!--
-            <div class="swiper-slide">
-              <div class="testimonial-item" data-aos="fade-up" data-aos-delay="200">
-                <p>
-                  <i class="bx bxs-quote-alt-left quote-icon-left"></i>
-                  Enim nisi quem export duis labore cillum quae magna enim sint quorum nulla quem veniam duis minim tempor labore quem eram duis noster aute amet eram fore quis sint minim.
-                  <i class="bx bxs-quote-alt-right quote-icon-right"></i>
-                </p>
-                <img src="assets/img/testimonials/testimonials-3.jpg" class="testimonial-img" alt="">
-                <h3>Jena Karlis</h3>
-                <h4>Store Owner</h4>
-              </div>
-            </div><-- End testimonial item -->
-            <!--
-            <div class="swiper-slide">
-              <div class="testimonial-item" data-aos="fade-up" data-aos-delay="300">
-                <p>
-                  <i class="bx bxs-quote-alt-left quote-icon-left"></i>
-                  Fugiat enim eram quae cillum dolore dolor amet nulla culpa multos export minim fugiat minim velit minim dolor enim duis veniam ipsum anim magna sunt elit fore quem dolore labore illum veniam.
-                  <i class="bx bxs-quote-alt-right quote-icon-right"></i>
-                </p>
-                <img src="assets/img/testimonials/testimonials-4.jpg" class="testimonial-img" alt="">
-                <h3>Matt Brandon</h3>
-                <h4>Freelancer</h4>
-              </div>
-            </div><-- End testimonial item -->
-            <!--
-            <div class="swiper-slide">
-              <div class="testimonial-item" data-aos="fade-up" data-aos-delay="400">
-                <p>
-                  <i class="bx bxs-quote-alt-left quote-icon-left"></i>
-                  Quis quorum aliqua sint quem legam fore sunt eram irure aliqua veniam tempor noster veniam enim culpa labore duis sunt culpa nulla illum cillum fugiat legam esse veniam culpa fore nisi cillum quid.
-                  <i class="bx bxs-quote-alt-right quote-icon-right"></i>
-                </p>
-                <img src="assets/img/testimonials/testimonials-5.jpg" class="testimonial-img" alt="">
-                <h3>John Larson</h3>
-                <h4>Entrepreneur</h4>
-              </div>
-            </div><-- End testimonial item -->
-    <!--
-          </div>
-          <div class="swiper-pagination"></div>
-        </div>
-
-      </div>
-    </section><-- End Testimonials Section -->
-
-    <!-- ======= Contact Section ======= -->
-    <section id="contact" class="contact">
-      <div class="container">
-
-        <div class="section-title">
-          <h2>Contact</h2>
-          <!--<p></p>-->
-        </div>
-
-        <div class="row" data-aos="fade-in">
-
-          <div class="col-lg-5 d-flex align-items-stretch">
-            <div class="info">
-              <div class="address">
-                <i class="bi bi-geo-alt"></i>
-                <h4>Location:</h4>
-                <p>Exhibition Road, London SW7 2AZ</p>
-              </div>
-
-              <div class="email">
-                <i class="bi bi-envelope"></i>
-                <h4>Email:</h4>
-                <p>maximilian.adam22@imperial.ac.uk</p>
-              </div>
-
-              <!--<div class="phone">
-                <i class="bi bi-phone"></i>
-                <h4>Call:</h4>
-                <p>+1 5589 55488 55s</p>
-              </div>-->
-
-            <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2483.7843078591686!2d-0.17744842380074327!3d51.49882551133018!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48760567da220a01%3A0x31911b371c692e86!2sImperial%20College%20London!5e0!3m2!1sen!2suk!4v1687948822939!5m2!1sen!2suk" 
-              frameborder="0" style="border:0; width: 100%; height: 290px; filter: invert(90%);" allowfullscreen
-              loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-            </iframe>
-            </div>
-
-          </div>
-
-          <!--<div class="col-lg-7 mt-5 mt-lg-0 d-flex align-items-stretch">
-            <form action="forms/contact.php" method="post" role="form" class="php-email-form">
-              <div class="row">
-                <div class="form-group col-md-6">
-                  <label for="name">Your Name</label>
-                  <input type="text" name="name" class="form-control" id="name" required>
-                </div>
-                <div class="form-group col-md-6">
-                  <label for="name">Your Email</label>
-                  <input type="email" class="form-control" name="email" id="email" required>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="name">Subject</label>
-                <input type="text" class="form-control" name="subject" id="subject" required>
-              </div>
-              <div class="form-group">
-                <label for="name">Message</label>
-                <textarea class="form-control" name="message" rows="10" required></textarea>
-              </div>
-              <div class="my-3">
-                <div class="loading">Loading</div>
-                <div class="error-message"></div>
-                <div class="sent-message">Your message has been sent. Thank you!</div>
-              </div>
-              <div class="text-center"><button type="submit">Send Message</button></div>
-            </form>
-          </div>-->
-
-        </div>
-
-      </div>
-    </section><!-- End Contact Section -->
-
-  </main><!-- End #main -->
-
-  <!-- ======= Footer ======= -->
-  <footer id="footer">
-    <div class="container">
-      <div class="copyright">
-        &copy; Copyright <strong><span>Maximilian Adam</span></strong>
-      </div>
+  <!-- ======================= Footer ======================= -->
+  <footer>
+    <div class="wrap foot-row">
+      <span>© <span id="year">2026</span> Maximilian Adam</span>
+      <span>51.4988° N · 0.1749° W</span>
+      <a href="#hero">Back to top ↑</a>
     </div>
-  </footer><!-- End  Footer -->
+  </footer>
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <script>
+    (function () {
+      'use strict';
 
-  <!-- Vendor JS Files -->
-  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="assets/vendor/typed.js/typed.umd.js"></script>
-  <script src="assets/vendor/waypoints/noframework.waypoints.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
+      document.documentElement.classList.add('js');
 
-  <!-- Template Main JS File -->
-  <script src="assets/js/main.js"></script>
+      var rmq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      function reduced() { return rmq.matches; }
 
+      /* ==========================================================
+         E8 root system — geometry built once, shared by both canvases.
+
+         240 points as 8 concentric rings of 30 (240 roots, Coxeter
+         number 30). Alternate rings are offset by half a step (π/30)
+         so they interlock. Edges connect point pairs whose distance
+         (in normalised, rotation-invariant coordinates) falls into
+         three narrow bands:
+           · [0.115, 0.170] — nearest-neighbour web between
+             consecutive rings (mint)
+           · [0.240, 0.268] — radial spokes, ring k → k+2 (cyan)
+           · [0.580, 0.630] — long chords across the disc (indigo,
+             stride-sampled down to a cap)
+         ========================================================== */
+      var E8 = (function () {
+        var RINGS = 8, PER = 30, N = RINGS * PER;
+        var pts = new Float64Array(N * 2);
+        var p = 0, k, i, j;
+        for (k = 0; k < RINGS; k++) {
+          var r = (k + 1) / RINGS;
+          var off = (k % 2) ? Math.PI / PER : 0;
+          for (i = 0; i < PER; i++) {
+            var a = (i / PER) * 2 * Math.PI + off;
+            pts[p++] = r * Math.cos(a);
+            pts[p++] = r * Math.sin(a);
+          }
+        }
+
+        var defs = [
+          { lo: 0.115, hi: 0.170, cap: 900 },
+          { lo: 0.240, hi: 0.268, cap: 760 },
+          { lo: 0.580, hi: 0.630, cap: 540 }
+        ];
+        var raw = [[], [], []];
+        for (i = 0; i < N; i++) {
+          var xi = pts[2 * i], yi = pts[2 * i + 1];
+          for (j = i + 1; j < N; j++) {
+            var dx = xi - pts[2 * j], dy = yi - pts[2 * j + 1];
+            var d = Math.sqrt(dx * dx + dy * dy);
+            for (var b = 0; b < 3; b++) {
+              if (d >= defs[b].lo && d <= defs[b].hi) { raw[b].push(i, j); break; }
+            }
+          }
+        }
+        // Cap band sizes by deterministic stride sampling so density
+        // stays balanced and the frame stays cheap.
+        var edges = raw.map(function (arr, bi) {
+          var count = arr.length / 2, cap = defs[bi].cap;
+          if (count <= cap) return Uint16Array.from(arr);
+          var out = new Uint16Array(cap * 2), step = count / cap;
+          for (var t = 0; t < cap; t++) {
+            var s = Math.floor(t * step) * 2;
+            out[2 * t] = arr[s];
+            out[2 * t + 1] = arr[s + 1];
+          }
+          return out;
+        });
+
+        return { pts: pts, N: N, edges: edges, tx: new Float64Array(N * 2) };
+      })();
+
+      var EDGE_STYLES = [
+        { rgb: '110,231,199', alpha: 0.30 },   // mint — closest band
+        { rgb: '88,199,243',  alpha: 0.15 },   // cyan — mid band
+        { rgb: '125,140,205', alpha: 0.10 }    // faint indigo — longest
+      ];
+
+      /* Draw the rotated figure at (cx, cy) with radius R. */
+      function drawE8(ctx, cx, cy, R, angle, boost) {
+        boost = boost || 1;
+        var pts = E8.pts, N = E8.N, tx = E8.tx;
+        var cos = Math.cos(angle), sin = Math.sin(angle);
+        var i;
+        for (i = 0; i < N; i++) {
+          var x = pts[2 * i], y = pts[2 * i + 1];
+          tx[2 * i] = cx + (x * cos - y * sin) * R;
+          tx[2 * i + 1] = cy + (x * sin + y * cos) * R;
+        }
+
+        // Soft mint halo behind the figure
+        var halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.25);
+        halo.addColorStop(0, 'rgba(110,231,199,0.05)');
+        halo.addColorStop(1, 'rgba(110,231,199,0)');
+        ctx.fillStyle = halo;
+        ctx.fillRect(cx - R * 1.3, cy - R * 1.3, R * 2.6, R * 2.6);
+
+        // Edge bands, batched into one stroke per colour
+        for (var b = 0; b < E8.edges.length; b++) {
+          var e = E8.edges[b], s = EDGE_STYLES[b];
+          ctx.strokeStyle = 'rgba(' + s.rgb + ',' + Math.min(1, s.alpha * boost) + ')';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          for (var t = 0; t < e.length; t += 2) {
+            ctx.moveTo(tx[2 * e[t]], tx[2 * e[t] + 1]);
+            ctx.lineTo(tx[2 * e[t + 1]], tx[2 * e[t + 1] + 1]);
+          }
+          ctx.stroke();
+        }
+
+        // 240 nodes: faint halo pass, then bright mint cores
+        ctx.fillStyle = 'rgba(110,231,199,' + (0.10 * boost) + ')';
+        ctx.beginPath();
+        for (i = 0; i < N; i++) {
+          ctx.moveTo(tx[2 * i] + 2.6, tx[2 * i + 1]);
+          ctx.arc(tx[2 * i], tx[2 * i + 1], 2.6, 0, 6.2832);
+        }
+        ctx.fill();
+        ctx.fillStyle = 'rgba(110,231,199,' + Math.min(1, 0.85 * boost) + ')';
+        ctx.beginPath();
+        for (i = 0; i < N; i++) {
+          ctx.moveTo(tx[2 * i] + 1.2, tx[2 * i + 1]);
+          ctx.arc(tx[2 * i], tx[2 * i + 1], 1.2, 0, 6.2832);
+        }
+        ctx.fill();
+      }
+
+      /* ---------- Hero scene: starfield + rotating E8 ---------- */
+      (function heroScene() {
+        var canvas = document.getElementById('e8-canvas');
+        if (!canvas || !canvas.getContext) return;
+        var ctx = canvas.getContext('2d');
+        var hero = canvas.parentElement;
+
+        var W = 0, H = 0, cx = 0, cy = 0, R = 0;
+        var stars = [];
+        var angle = 0, last = 0, raf = 0, inView = true;
+
+        function seedStars() {
+          stars = [];
+          var count = Math.round(Math.min(150, Math.max(90, (W * H) / 14000)));
+          for (var i = 0; i < count; i++) {
+            stars.push({
+              x: Math.random() * W,
+              y: Math.random() * H,
+              r: 0.4 + Math.random() * 1.1,
+              base: 0.12 + Math.random() * 0.4,
+              spd: 0.3 + Math.random() * 1.2,
+              ph: Math.random() * Math.PI * 2,
+              tint: Math.random() < 0.12 ? '88,199,243' : '207,217,247'
+            });
+          }
+          // One warm guide star — the single amber point in the field
+          stars.push({ x: W * 0.22, y: H * 0.24, r: 1.7, base: 0.8, spd: 0.5, ph: 0, tint: '232,164,107' });
+        }
+
+        function layout() {
+          var dpr = Math.min(2, window.devicePixelRatio || 1);
+          W = hero.clientWidth;
+          H = hero.clientHeight;
+          canvas.width = Math.round(W * dpr);
+          canvas.height = Math.round(H * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          var wide = W >= 900;
+          cx = wide ? W * 0.68 : W * 0.5;
+          cy = wide ? H * 0.5 : H * 0.30;
+          R = wide ? Math.min(W * 0.27, H * 0.40) : Math.min(W * 0.42, H * 0.23);
+          seedStars();
+          frame(last || performance.now());
+        }
+
+        function frame(t) {
+          ctx.clearRect(0, 0, W, H);
+          var time = t * 0.001;
+          for (var i = 0; i < stars.length; i++) {
+            var s = stars[i];
+            var a = reduced() ? s.base : s.base * (0.55 + 0.45 * Math.sin(time * s.spd + s.ph));
+            ctx.fillStyle = 'rgba(' + s.tint + ',' + a.toFixed(3) + ')';
+            ctx.fillRect(s.x, s.y, s.r, s.r);
+          }
+          drawE8(ctx, cx, cy, R, angle);
+        }
+
+        function loop(t) {
+          var dt = Math.min(50, t - last);
+          last = t;
+          angle += dt * 0.000025;   // ≈ 0.025 rad/s — a full turn every ~4 min
+          frame(t);
+          raf = requestAnimationFrame(loop);
+        }
+
+        function start() {
+          if (raf || reduced() || document.hidden || !inView) return;
+          last = performance.now();
+          raf = requestAnimationFrame(loop);
+        }
+        function stop() {
+          if (raf) { cancelAnimationFrame(raf); raf = 0; }
+        }
+
+        layout();
+        start();
+
+        // Redraw on resize; pause off-screen and in hidden tabs.
+        if ('ResizeObserver' in window) {
+          new ResizeObserver(layout).observe(hero);
+        } else {
+          window.addEventListener('resize', layout);
+        }
+        if ('IntersectionObserver' in window) {
+          new IntersectionObserver(function (entries) {
+            inView = entries[0].isIntersecting;
+            if (inView) start(); else stop();
+          }).observe(canvas);
+        }
+        document.addEventListener('visibilitychange', function () {
+          if (document.hidden) stop(); else start();
+        });
+        // Under reduced motion, stop the loop and leave one static frame.
+        var onRM = function () {
+          if (reduced()) { stop(); frame(performance.now()); } else start();
+        };
+        if (rmq.addEventListener) rmq.addEventListener('change', onRM);
+        else if (rmq.addListener) rmq.addListener(onRM);
+      })();
+
+      /* ---------- Research panel: small static render ---------- */
+      (function miniScene() {
+        var canvas = document.getElementById('e8-mini');
+        if (!canvas || !canvas.getContext) return;
+        var ctx = canvas.getContext('2d');
+        function render() {
+          var s = canvas.clientWidth;
+          if (!s) return;
+          var dpr = Math.min(2, window.devicePixelRatio || 1);
+          canvas.width = Math.round(s * dpr);
+          canvas.height = Math.round(s * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          drawE8(ctx, s / 2, s / 2, s * 0.46, Math.PI / 60, 1.15);
+        }
+        if ('ResizeObserver' in window) new ResizeObserver(render).observe(canvas);
+        else window.addEventListener('resize', render);
+        render();
+      })();
+
+      /* ---------- Nav condense + rail progress (rAF-throttled) ---------- */
+      var nav = document.querySelector('.site-nav');
+      var railFill = document.querySelector('.rail-fill');
+      var ticking = false;
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () {
+          ticking = false;
+          nav.classList.toggle('scrolled', window.scrollY > 24);
+          if (railFill) {
+            var h = document.documentElement.scrollHeight - window.innerHeight;
+            railFill.style.height = (h > 0 ? Math.min(100, (window.scrollY / h) * 100) : 0) + '%';
+          }
+        });
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      /* ---------- Mobile menu ---------- */
+      var menuBtn = document.querySelector('.menu-btn');
+      function setMenu(open) {
+        document.body.classList.toggle('menu-open', open);
+        menuBtn.setAttribute('aria-expanded', String(open));
+        menuBtn.textContent = open ? 'Close' : 'Menu';
+      }
+      menuBtn.addEventListener('click', function () {
+        setMenu(!document.body.classList.contains('menu-open'));
+      });
+      document.getElementById('nav-menu').addEventListener('click', function (e) {
+        if (e.target.closest('a')) setMenu(false);
+      });
+      window.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && document.body.classList.contains('menu-open')) {
+          setMenu(false);
+          menuBtn.focus();
+        }
+      });
+
+      /* ---------- Scroll reveals ---------- */
+      var revealEls = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) {
+              en.target.classList.add('in');
+              io.unobserve(en.target);
+            }
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        revealEls.forEach(function (el) { io.observe(el); });
+      } else {
+        revealEls.forEach(function (el) { el.classList.add('in'); });
+      }
+
+      /* ---------- Section spy: nav highlight + rail label ---------- */
+      var sections = Array.prototype.slice.call(document.querySelectorAll('main section[id]'));
+      var navLinks = {};
+      Array.prototype.forEach.call(document.querySelectorAll('.nav-links a[href^="#"]'), function (a) {
+        navLinks[a.getAttribute('href').slice(1)] = a;
+      });
+      var railLabel = document.querySelector('.rail-label');
+      var currentId = '';
+      function setCurrent(sec) {
+        if (sec.id === currentId) return;
+        currentId = sec.id;
+        for (var id in navLinks) {
+          if (id === currentId) navLinks[id].setAttribute('aria-current', 'true');
+          else navLinks[id].removeAttribute('aria-current');
+        }
+        if (railLabel && sec.dataset.rail) railLabel.textContent = sec.dataset.rail;
+      }
+      if ('IntersectionObserver' in window) {
+        var spy = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) setCurrent(en.target);
+          });
+        }, { rootMargin: '-45% 0px -50% 0px' });
+        sections.forEach(function (s) { spy.observe(s); });
+      }
+
+      /* ---------- Project filters ---------- */
+      var filterBtns = Array.prototype.slice.call(document.querySelectorAll('.filter'));
+      var cards = Array.prototype.slice.call(document.querySelectorAll('.project'));
+      filterBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          filterBtns.forEach(function (b) {
+            var active = b === btn;
+            b.classList.toggle('is-active', active);
+            b.setAttribute('aria-pressed', String(active));
+          });
+          var f = btn.dataset.filter;
+          cards.forEach(function (c) {
+            var show = f === 'all' || c.dataset.tags.split(' ').indexOf(f) !== -1;
+            c.classList.toggle('is-hidden', !show);
+            c.classList.remove('pop');
+            if (show) {
+              void c.offsetWidth;   // restart the entrance animation
+              c.classList.add('pop');
+            }
+          });
+        });
+      });
+
+      /* ---------- Footer year ---------- */
+      var yearEl = document.getElementById('year');
+      if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+    })();
+  </script>
 </body>
-
 </html>
