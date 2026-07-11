@@ -205,9 +205,19 @@
 
     @media (max-width: 840px) {
       .menu-btn { display: inline-flex; }
+      /* The scrolled header's backdrop-filter creates a containing block for
+         fixed descendants. Disable it while the menu is open so the overlay
+         remains fixed to the viewport instead of the 3.4rem-tall header. */
+      body.menu-open .site-nav.scrolled {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
       .nav-links {
         position: fixed;
         inset: 0;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
         z-index: 60;
         flex-direction: column;
         justify-content: center;
